@@ -2,7 +2,7 @@ package com.simulasyon.mulakat_simulasyon_api.controller;
 
 
 import com.simulasyon.mulakat_simulasyon_api.dto.request.MulakatStartRequest;
-import com.simulasyon.mulakat_simulasyon_api.entity.MulakatSession;
+import com.simulasyon.mulakat_simulasyon_api.dto.response.MulakatStartResponse;
 import com.simulasyon.mulakat_simulasyon_api.service.MulakatSessionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +22,14 @@ public class MulakatSessionController {
     }
 
     @PostMapping
-    public ResponseEntity<MulakatSession> startMulakat(@RequestBody MulakatStartRequest mulakatStartRequest) {
+    public ResponseEntity<MulakatStartResponse> startMulakat(@RequestBody MulakatStartRequest mulakatStartRequest) {
         Long userId = mulakatStartRequest.getUserId();
         String technology = mulakatStartRequest.getTechnology();
+        String difficulty = mulakatStartRequest.getDifficulty();
 
-        MulakatSession newMulakat = mulakatSessionService.mulakatStart(userId,technology);
+        MulakatStartResponse response = mulakatSessionService.mulakatStart(userId,technology,difficulty);
 
-        return new ResponseEntity<>(newMulakat,HttpStatus.CREATED);
+
+        return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 }
