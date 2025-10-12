@@ -1,7 +1,7 @@
 package com.simulasyon.mulakat_simulasyon_api.controller;
 
 
-import com.simulasyon.mulakat_simulasyon_api.dto.GoogleLoginRequest;
+import com.simulasyon.mulakat_simulasyon_api.dto.request.GoogleLoginRequest;
 import com.simulasyon.mulakat_simulasyon_api.entity.User;
 import com.simulasyon.mulakat_simulasyon_api.service.UserService;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,5 @@
-package com.simulasyon.mulakat_simulasyon_api.dto;
+package com.simulasyon.mulakat_simulasyon_api.dto.request;
 
-import com.simulasyon.mulakat_simulasyon_api.entity.MulakatSession;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,4 +8,5 @@ import lombok.Setter;
 public class MulakatStartRequest {
     private Long userId;
     private String technology;
+    private String difficulty;
 }

@@ -1,7 +1,7 @@
 package com.simulasyon.mulakat_simulasyon_api.controller;
 
 
-import com.simulasyon.mulakat_simulasyon_api.dto.MulakatStartRequest;
+import com.simulasyon.mulakat_simulasyon_api.dto.request.MulakatStartRequest;
 import com.simulasyon.mulakat_simulasyon_api.entity.MulakatSession;
 import com.simulasyon.mulakat_simulasyon_api.service.MulakatSessionService;
 import org.springframework.http.HttpStatus;

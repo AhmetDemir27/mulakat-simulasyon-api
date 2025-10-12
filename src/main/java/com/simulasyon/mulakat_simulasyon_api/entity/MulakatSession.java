@@ -22,6 +22,9 @@ public class MulakatSession {
     @Column(nullable = false)
     private String technology;
 
+    @Column(nullable = false)
+    private String difficulty;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Durum durum;

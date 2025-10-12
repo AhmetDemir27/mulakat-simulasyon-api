@@ -1,4 +1,4 @@
-package com.simulasyon.mulakat_simulasyon_api.dto;
+package com.simulasyon.mulakat_simulasyon_api.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
