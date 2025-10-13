@@ -2,14 +2,13 @@ package com.simulasyon.mulakat_simulasyon_api.controller;
 
 
 import com.simulasyon.mulakat_simulasyon_api.dto.request.MulakatStartRequest;
+import com.simulasyon.mulakat_simulasyon_api.dto.request.SendAnswerRequest;
+import com.simulasyon.mulakat_simulasyon_api.dto.response.AnswerEvaluationResponse;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.MulakatStartResponse;
 import com.simulasyon.mulakat_simulasyon_api.service.MulakatSessionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/mulakatlar/")
@@ -31,5 +30,15 @@ public class MulakatSessionController {
 
 
         return new ResponseEntity<>(response,HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{sessionId}/answer")
+    public ResponseEntity<AnswerEvaluationResponse> sendAnswer(@PathVariable Long sessionId,
+                                                               @RequestBody SendAnswerRequest sendAnswerRequest) {
+        AnswerEvaluationResponse response = mulakatSessionService.answerEvaluation(
+                sessionId,
+                sendAnswerRequest.getQuestionId(),
+                sendAnswerRequest.getAnswerText());
+    return ResponseEntity.ok(response);
     }
 }

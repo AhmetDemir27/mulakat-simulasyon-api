@@ -35,4 +35,27 @@ public class OllamaService {
         }
 
     }
+
+    public String answerEvaluate(String question ,String anwer,String model) {
+        String prompt = String.format(
+                "Bir yazılım mülakatında sorulan '%s' sorusuna, kullanıcı '%s' cevabını verdi. " +
+                "Bu cevabın doğruluğunu, teknik derinliğini ve açıklama kalitesini değerlendir. " +
+                "Cevabını şu formatta ver: 'Puan: [1-10 arası bir puan] ||| Geri Bildirim: [Cevap hakkındaki detaylı geri bildirimin]'. " +
+                "Başka hiçbir ek metin veya açıklama ekleme.",question,anwer);
+
+        OllomaRequest requestBody = new OllomaRequest(model,prompt,false);
+        OllomaResponse response = webClient.post()
+                .uri("/api/generate")
+                .body(Mono.just(requestBody),OllomaRequest.class)
+                .retrieve()
+                .bodyToMono((OllomaResponse.class))
+                .block();
+
+        if(response!=null && response.getResponse()!=null){
+            return response.getResponse().trim();
+        }
+        else {
+            throw new RuntimeException("Ollama API den geçerli bir değerlendirme olmadı!");
+        }
+    }
 }
