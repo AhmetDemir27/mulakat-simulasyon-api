@@ -31,6 +31,7 @@ public class Answer {
     @Column(name="answer_time")
     private LocalDateTime answerTime;
 
+
     @PrePersist
     public void onCreat() {
         this.answerTime = LocalDateTime.now();

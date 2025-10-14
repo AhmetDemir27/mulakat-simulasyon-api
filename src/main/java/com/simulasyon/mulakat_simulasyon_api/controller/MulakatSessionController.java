@@ -1,10 +1,12 @@
 package com.simulasyon.mulakat_simulasyon_api.controller;
 
 
+import com.simulasyon.mulakat_simulasyon_api.dto.MulakatSessionDto;
 import com.simulasyon.mulakat_simulasyon_api.dto.request.MulakatStartRequest;
 import com.simulasyon.mulakat_simulasyon_api.dto.request.SendAnswerRequest;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.AnswerEvaluationResponse;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.MulakatStartResponse;
+import com.simulasyon.mulakat_simulasyon_api.entity.MulakatSession;
 import com.simulasyon.mulakat_simulasyon_api.service.MulakatSessionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,5 +42,13 @@ public class MulakatSessionController {
                 sendAnswerRequest.getQuestionId(),
                 sendAnswerRequest.getAnswerText());
     return ResponseEntity.ok(response);
+    }
+    @PostMapping("/{sessionId}/finish/")
+    public ResponseEntity<MulakatSessionDto> finishMulakat(@PathVariable Long sessionId){
+
+         MulakatSessionDto mulakatfinishDto =  mulakatSessionService.mulakatFinish(sessionId);
+
+         return ResponseEntity.ok(mulakatfinishDto);
+
     }
 }

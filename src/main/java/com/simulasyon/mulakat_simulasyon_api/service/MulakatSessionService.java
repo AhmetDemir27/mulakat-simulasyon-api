@@ -1,19 +1,20 @@
 package com.simulasyon.mulakat_simulasyon_api.service;
 
 import com.simulasyon.mulakat_simulasyon_api.dto.AnswerDto;
+import com.simulasyon.mulakat_simulasyon_api.dto.MulakatSessionDto;
 import com.simulasyon.mulakat_simulasyon_api.dto.QuestionDto;
+import com.simulasyon.mulakat_simulasyon_api.dto.UserDto;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.AnswerEvaluationResponse;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.MulakatStartResponse;
-import com.simulasyon.mulakat_simulasyon_api.entity.Answer;
-import com.simulasyon.mulakat_simulasyon_api.entity.MulakatSession;
-import com.simulasyon.mulakat_simulasyon_api.entity.Question;
-import com.simulasyon.mulakat_simulasyon_api.entity.User;
+import com.simulasyon.mulakat_simulasyon_api.entity.*;
 import com.simulasyon.mulakat_simulasyon_api.repository.AnswerRepository;
 import com.simulasyon.mulakat_simulasyon_api.repository.MulakatSessionRepository;
 import com.simulasyon.mulakat_simulasyon_api.repository.QuestionRepository;
 import com.simulasyon.mulakat_simulasyon_api.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class MulakatSessionService {
@@ -122,5 +123,36 @@ public class MulakatSessionService {
         finalResponse.setNextQuestionId(updatedQuestion.getId());
 
         return finalResponse;
+    }
+
+    @Transactional
+    public MulakatSessionDto mulakatFinish (Long sessionId){
+        MulakatSession session = mulakatSessionRepository.findById(sessionId)
+                .orElseThrow(()-> new RuntimeException("Geçerli Oturum Bulunamadı! ID: " + sessionId));
+
+        if(session.getDurum()== Durum.BITTI){
+            throw new IllegalStateException("Bu mülakat oturumu zaten daha önce bitirilmiş.");
+        }
+
+        session.setDurum(Durum.BITTI);
+        session.setFinishTime(LocalDateTime.now());
+        MulakatSession savedSession = mulakatSessionRepository.save(session);
+
+        User userEntity = savedSession.getUser();
+        UserDto userDto = new UserDto();
+        userDto.setUserId(userEntity.getId());
+        userDto.setUserName(userEntity.getNameSurname());
+        userDto.setProfileFotoUrl(userEntity.getProfileFotoUrl());
+
+        MulakatSessionDto sessionDto = new MulakatSessionDto();
+        sessionDto.setUserId(savedSession.getId());
+        sessionDto.setUser(userDto);
+        sessionDto.setTechnology(savedSession.getTechnology());
+        sessionDto.setDificulty(savedSession.getDifficulty());
+        sessionDto.setDurum(savedSession.getDurum());
+        sessionDto.setStartTime(savedSession.getStartTime());
+        sessionDto.setFinishTime(savedSession.getFinishTime());
+
+        return sessionDto;
     }
 }
