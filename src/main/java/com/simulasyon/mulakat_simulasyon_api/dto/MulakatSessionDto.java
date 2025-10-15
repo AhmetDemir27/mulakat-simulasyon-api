@@ -7,10 +7,10 @@ import java.time.LocalDateTime;
 
 @Data
 public class MulakatSessionDto {
-private Long userId;
+private Long Id;
 private UserDto user;
 private String technology;
-private String dificulty;
+private String difficulty;
 private Durum durum;
 private LocalDateTime startTime;
 private LocalDateTime finishTime;

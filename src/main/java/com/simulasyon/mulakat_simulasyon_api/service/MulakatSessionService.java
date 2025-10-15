@@ -15,6 +15,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class MulakatSessionService {
@@ -159,14 +161,43 @@ public class MulakatSessionService {
         userDto.setProfileFotoUrl(userEntity.getProfileFotoUrl());
 
         MulakatSessionDto sessionDto = new MulakatSessionDto();
-        sessionDto.setUserId(savedSession.getId());
+        sessionDto.setId(savedSession.getId());
         sessionDto.setUser(userDto);
         sessionDto.setTechnology(savedSession.getTechnology());
-        sessionDto.setDificulty(savedSession.getDifficulty());
+        sessionDto.setDifficulty(savedSession.getDifficulty());
         sessionDto.setDurum(savedSession.getDurum());
         sessionDto.setStartTime(savedSession.getStartTime());
         sessionDto.setFinishTime(savedSession.getFinishTime());
 
         return sessionDto;
+    }
+
+    public List<MulakatSessionDto> kullanicininMulakatlariniListele(Long userId){
+
+        List<MulakatSession> mulakatSessionList = mulakatSessionRepository.findByUserId(userId);
+        List<MulakatSessionDto> mulakatSessionDtoList = new ArrayList<>();
+
+        for(MulakatSession mulakatSessionEntity : mulakatSessionList){
+            MulakatSessionDto mulakatSessionDto = new MulakatSessionDto();
+
+            mulakatSessionDto.setId(mulakatSessionEntity.getId());
+            mulakatSessionDto.setTechnology(mulakatSessionEntity.getTechnology());
+            mulakatSessionDto.setDurum(mulakatSessionEntity.getDurum());
+            mulakatSessionDto.setStartTime(mulakatSessionEntity.getStartTime());
+            mulakatSessionDto.setFinishTime(mulakatSessionEntity.getFinishTime());
+            mulakatSessionDto.setDifficulty(mulakatSessionEntity.getDifficulty());
+
+            User userEntity = mulakatSessionEntity.getUser();
+            UserDto userDto = new UserDto();
+
+            userDto.setUserId(userEntity.getId());
+            userDto.setUserName(userEntity.getNameSurname());
+            userDto.setProfileFotoUrl(userEntity.getProfileFotoUrl());
+
+            mulakatSessionDto.setUser(userDto);
+
+            mulakatSessionDtoList.add(mulakatSessionDto);
+        }
+        return mulakatSessionDtoList;
     }
 }

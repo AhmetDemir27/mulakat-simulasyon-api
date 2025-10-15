@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/mulakatlar/")
 public class MulakatSessionController {
@@ -48,5 +50,12 @@ public class MulakatSessionController {
 
          return ResponseEntity.ok(mulakatfinishDto);
 
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MulakatSessionDto>> getMulakatlarByUser(
+            @RequestParam(name = "userId") Long userId){
+        List<MulakatSessionDto> mulakatlar = mulakatSessionService.kullanicininMulakatlariniListele(userId);
+        return ResponseEntity.ok(mulakatlar);
     }
 }

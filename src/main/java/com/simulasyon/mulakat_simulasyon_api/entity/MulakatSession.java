@@ -23,7 +23,7 @@ public class MulakatSession {
     private String technology;
 
     @Column(name= "total_count_of_question",nullable = false)
-    private Integer totalCountOfQuestion = 5;
+    private Integer totalCountOfQuestion ;
 
     @Column(nullable = false)
     private String difficulty;
