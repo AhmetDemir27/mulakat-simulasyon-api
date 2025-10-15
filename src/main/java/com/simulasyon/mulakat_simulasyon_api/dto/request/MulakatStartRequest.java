@@ -9,4 +9,5 @@ public class MulakatStartRequest {
     private Long userId;
     private String technology;
     private String difficulty;
+    private Integer totalCountOfQuestion;
 }

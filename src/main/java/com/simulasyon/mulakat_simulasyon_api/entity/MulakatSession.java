@@ -22,6 +22,9 @@ public class MulakatSession {
     @Column(nullable = false)
     private String technology;
 
+    @Column(name= "total_count_of_question",nullable = false)
+    private Integer totalCountOfQuestion = 5;
+
     @Column(nullable = false)
     private String difficulty;
 

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AnswerRepository extends JpaRepository<Answer,Long> {
-
+    long countByQuestion_MulakatSession_Id(long sessionId);
 }

@@ -1,7 +1,6 @@
 package com.simulasyon.mulakat_simulasyon_api.dto.response;
 
 import com.simulasyon.mulakat_simulasyon_api.dto.AnswerDto;
-import com.simulasyon.mulakat_simulasyon_api.entity.Answer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

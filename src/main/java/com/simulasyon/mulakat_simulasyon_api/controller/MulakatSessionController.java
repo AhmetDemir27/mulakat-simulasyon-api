@@ -6,7 +6,6 @@ import com.simulasyon.mulakat_simulasyon_api.dto.request.MulakatStartRequest;
 import com.simulasyon.mulakat_simulasyon_api.dto.request.SendAnswerRequest;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.AnswerEvaluationResponse;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.MulakatStartResponse;
-import com.simulasyon.mulakat_simulasyon_api.entity.MulakatSession;
 import com.simulasyon.mulakat_simulasyon_api.service.MulakatSessionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +26,9 @@ public class MulakatSessionController {
         Long userId = mulakatStartRequest.getUserId();
         String technology = mulakatStartRequest.getTechnology();
         String difficulty = mulakatStartRequest.getDifficulty();
+        Integer totalCountOfQuestion = mulakatStartRequest.getTotalCountOfQuestion();
 
-        MulakatStartResponse response = mulakatSessionService.mulakatStart(userId,technology,difficulty);
-
-
+        MulakatStartResponse response = mulakatSessionService.mulakatStart(userId,technology,difficulty,totalCountOfQuestion);
         return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 

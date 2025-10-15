@@ -36,13 +36,18 @@ public class MulakatSessionService {
         this.answerRepository = answerRepository;
     }
     @Transactional
-    public MulakatStartResponse mulakatStart(Long userId, String technology, String difficulty) {
+    public MulakatStartResponse mulakatStart(Long userId, String technology, String difficulty ,Integer countQuestion) {
 
         User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("Bu ID'ye sahip kullanıcı bulunmuyor"));
         MulakatSession newSession = new MulakatSession();
         newSession.setUser(user);
         newSession.setTechnology(technology);
         newSession.setDifficulty(difficulty);
+
+        if(countQuestion!=null && countQuestion>0){
+            newSession.setTotalCountOfQuestion(countQuestion);
+        }
+
         MulakatSession savedSession = mulakatSessionRepository.save(newSession);
 
         String producedQuestionText = ollamaService.QuestionCreat("llama3",technology,difficulty);
@@ -96,12 +101,21 @@ public class MulakatSessionService {
 
         Answer evaluatedAnswerEntity = answerRepository.save(answer);
 
-        String newQuestionText = ollamaService.QuestionCreat("llama3", mulakatSession.getTechnology(), mulakatSession.getDifficulty());
+        long cevaplananSoruSayisi = answerRepository.countByQuestion_MulakatSession_Id(sessionId);
 
-        Question newQuestion = new Question();
-        newQuestion.setMulakatSession(mulakatSession);
-        newQuestion.setQuestionText(newQuestionText);
-        Question updatedQuestion = questionRepository.save(newQuestion);
+        String nextQuestionText = null;
+        Long nextQuestionId = null;
+
+        if(cevaplananSoruSayisi<mulakatSession.getTotalCountOfQuestion()){
+            nextQuestionText =ollamaService.QuestionCreat("llama3", mulakatSession.getTechnology(), mulakatSession.getDifficulty());
+            Question newQuestion = new Question();
+            newQuestion.setMulakatSession(mulakatSession);
+            newQuestion.setQuestionText(nextQuestionText);
+            Question savedQuestion = questionRepository.save(newQuestion);
+            nextQuestionId = savedQuestion.getId();
+        }else {
+            mulakatFinish(sessionId);
+        }
 
         Question evaluatedQuestionEntity = evaluatedAnswerEntity.getQuestion();
 
@@ -119,8 +133,8 @@ public class MulakatSessionService {
 
         AnswerEvaluationResponse finalResponse = new AnswerEvaluationResponse();
         finalResponse.setAnswerEvaluation(answerDto);
-        finalResponse.setNextQuestionText(updatedQuestion.getQuestionText());
-        finalResponse.setNextQuestionId(updatedQuestion.getId());
+        finalResponse.setNextQuestionText(nextQuestionText);
+        finalResponse.setNextQuestionId(nextQuestionId);
 
         return finalResponse;
     }
