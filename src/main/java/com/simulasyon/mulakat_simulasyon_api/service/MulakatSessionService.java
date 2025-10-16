@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class MulakatSessionService {
@@ -61,13 +63,23 @@ public class MulakatSessionService {
         Question firstQuestion = new Question();
         firstQuestion.setMulakatSession(savedSession);
         firstQuestion.setQuestionText(producedQuestionText);
-        questionRepository.save(firstQuestion);
+        Question savedQuestion = questionRepository.save(firstQuestion);
 
-        MulakatStartResponse response = new MulakatStartResponse();
-        response.setSessionDetails(savedSession);
-        response.setFirstQuestionText(producedQuestionText);
+        UserDto userDto = new UserDto();
+        userDto.setUserId(user.getId());
+        userDto.setUserName(user.getNameSurname());
+        userDto.setProfileFotoUrl(user.getProfileFotoUrl());
 
-        return response;
+        MulakatSessionDto sessionDto = new MulakatSessionDto();
+        sessionDto.setId(savedSession.getId());
+        sessionDto.setUser(userDto); // İçine UserDTO'yu koy
+        sessionDto.setTechnology(savedSession.getTechnology());
+        sessionDto.setDifficulty(savedSession.getDifficulty());
+        sessionDto.setDurum(savedSession.getDurum());
+        sessionDto.setStartTime(savedSession.getStartTime());
+        sessionDto.setFinishTime(savedSession.getFinishTime());
+
+        return new MulakatStartResponse(sessionDto,savedQuestion.getQuestionText(),savedQuestion.getId());
     }
     @Transactional
     public AnswerEvaluationResponse answerEvaluation(Long sessionId, Long questionId,String answerText) {
@@ -88,32 +100,16 @@ public class MulakatSessionService {
 
         String evaluationResult = ollamaService.answerEvaluate(question.getQuestionText(), answerText,"llama3");
 
-        try{
-            String[] parts = evaluationResult.split("\\|\\|\\|");
-            if(parts.length>=2){
-            String puanStr=parts[0].replace("Puan :","").trim();
-            String callback = parts[1].replace("Geri Bildirim :","").trim();
-
-            answer.setPuan(Integer.parseInt(puanStr));
-            answer.setCallback(callback);}
-            else{
-                throw new Exception("Beklenen format bulunamadı");
-            }
-        }catch(Exception e){
-            System.err.println("Ollama cevabı ayrıştırıldı: "+ evaluationResult);
-            answer.setPuan(0);
-            answer.setCallback("Değerlendirme formatı anlaşılamadı. Ham cevap: " + evaluationResult);
-        }
-
+        parseAndSetEvalation(answer,evaluationResult);
         Answer evaluatedAnswerEntity = answerRepository.save(answer);
 
         long cevaplananSoruSayisi = answerRepository.countByQuestion_MulakatSession_Id(sessionId);
 
         String nextQuestionText = null;
-        Long nextQuestionId = null;
+        Long nextQuestionId=null;
 
-        if(cevaplananSoruSayisi<mulakatSession.getTotalCountOfQuestion()){
-            nextQuestionText =ollamaService.QuestionCreat("llama3", mulakatSession.getTechnology(), mulakatSession.getDifficulty());
+        if(cevaplananSoruSayisi< mulakatSession.getTotalCountOfQuestion()){
+            nextQuestionText = ollamaService.QuestionCreat("llama3",mulakatSession.getTechnology(),mulakatSession.getDifficulty());
             Question newQuestion = new Question();
             newQuestion.setMulakatSession(mulakatSession);
             newQuestion.setQuestionText(nextQuestionText);
@@ -123,6 +119,29 @@ public class MulakatSessionService {
             mulakatFinish(sessionId);
         }
 
+        return createFinalResponse(evaluatedAnswerEntity,nextQuestionText,nextQuestionId);
+    }
+    private void parseAndSetEvalation(Answer answer,String evaluationResult) {
+        final Pattern pattern = Pattern.compile("Puan:\\s*(\\d+)\\s*\\|{3}\\s*Geri Bildirim:(.*)", Pattern.DOTALL);
+        final Matcher matcher = pattern.matcher(evaluationResult.trim());
+
+        if (matcher.find()) {
+            try {
+                answer.setPuan(Integer.parseInt(matcher.group(1).trim()));
+                answer.setCallback(matcher.group(2).trim());
+            } catch (Exception e) {
+                setFallbackEvaluation(answer, evaluationResult);
+            }
+        } else {
+            System.err.println("Ollama cevabı regex ile ayrıştırılamadı: " + evaluationResult);
+            setFallbackEvaluation(answer, evaluationResult);
+        }
+    }
+    private void setFallbackEvaluation (Answer answer,String rawResult){
+            answer.setPuan(0);
+        answer.setCallback("Değerlendirme formatı anlaşılamadı. Ham cevap: " + rawResult);
+    }
+    private AnswerEvaluationResponse createFinalResponse(Answer evaluatedAnswerEntity,String nextQuestionText,Long nextQuestionId) {
         Question evaluatedQuestionEntity = evaluatedAnswerEntity.getQuestion();
 
         QuestionDto questionDto = new QuestionDto();

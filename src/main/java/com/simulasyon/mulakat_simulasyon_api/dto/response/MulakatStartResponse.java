@@ -1,6 +1,7 @@
 package com.simulasyon.mulakat_simulasyon_api.dto.response;
 
 
+import com.simulasyon.mulakat_simulasyon_api.dto.MulakatSessionDto;
 import com.simulasyon.mulakat_simulasyon_api.entity.MulakatSession;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MulakatStartResponse {
-    private MulakatSession sessionDetails;
+    private MulakatSessionDto sessionDetails;
     private String firstQuestionText;
+    private Long firtQuestionId;
 }
