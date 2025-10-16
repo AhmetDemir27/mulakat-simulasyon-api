@@ -5,7 +5,9 @@ import com.simulasyon.mulakat_simulasyon_api.dto.MulakatSessionDto;
 import com.simulasyon.mulakat_simulasyon_api.dto.QuestionDto;
 import com.simulasyon.mulakat_simulasyon_api.dto.UserDto;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.AnswerEvaluationResponse;
+import com.simulasyon.mulakat_simulasyon_api.dto.response.MulakatDetayDto;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.MulakatStartResponse;
+import com.simulasyon.mulakat_simulasyon_api.dto.response.SoruCevapPairDto;
 import com.simulasyon.mulakat_simulasyon_api.entity.*;
 import com.simulasyon.mulakat_simulasyon_api.repository.AnswerRepository;
 import com.simulasyon.mulakat_simulasyon_api.repository.MulakatSessionRepository;
@@ -16,7 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MulakatSessionService {
@@ -200,4 +204,71 @@ public class MulakatSessionService {
         }
         return mulakatSessionDtoList;
     }
+
+    @Transactional
+    public MulakatDetayDto getMulakatDetaylari(Long userId, Long sessionId){
+        MulakatSession session = mulakatSessionRepository.findById(sessionId)
+                .orElseThrow(()-> new RuntimeException("Mülakat oturumu bulunamadı ID : "+sessionId ));
+
+        if(!session.getUser().getId().equals(userId)){
+            throw new SecurityException("Bu kullanıcıya ait böyle bir mülakat bulunmamaktadır.");
+        }
+
+
+        List<Question> questions = questionRepository.findByMulakatSession_Id(sessionId);
+        List<Answer> answers = answerRepository.findByQuestion_MulakatSession_Id(sessionId);
+
+        Map<Long,Answer> answerMap = new HashMap<>();
+        for(Answer answer : answers){
+            answerMap.put(answer.getQuestion().getId(),answer);
+        }
+
+        List< SoruCevapPairDto> soruCevapPairDtoList = new ArrayList<>();
+        double totalPuan=0;
+        int puanlananCevapSayisi=0;
+
+        for(Question question : questions){
+            SoruCevapPairDto pair =  new SoruCevapPairDto();
+            pair.setQuestionText(question.getQuestionText());
+
+            Answer iligiliAnswer = answerMap.get(question.getId());
+
+            if(iligiliAnswer!=null){
+                pair.setAnswerText(iligiliAnswer.getAnswerText());
+                pair.setCallback(iligiliAnswer.getCallback());
+                pair.setPuan(iligiliAnswer.getPuan());
+
+                if(iligiliAnswer.getPuan()!=null){
+                    totalPuan += iligiliAnswer.getPuan();
+                    puanlananCevapSayisi++;
+                }
+                soruCevapPairDtoList.add(pair);
+            }
+        }
+
+        double puanOrtalamasi = (puanlananCevapSayisi>0) ? (totalPuan/puanlananCevapSayisi) : 0.0;
+
+
+        UserDto userDto = new UserDto();
+        userDto.setUserId(session.getUser().getId());
+        userDto.setUserName(session.getUser().getNameSurname());
+        userDto.setProfileFotoUrl(session.getUser().getProfileFotoUrl());
+
+        MulakatSessionDto mulakatSessionDto = new MulakatSessionDto();
+        mulakatSessionDto.setId(sessionId);
+        mulakatSessionDto.setUser(userDto);
+        mulakatSessionDto.setTechnology(session.getTechnology());
+        mulakatSessionDto.setDurum(session.getDurum());
+        mulakatSessionDto.setStartTime(session.getStartTime());
+        mulakatSessionDto.setFinishTime(session.getFinishTime());
+        mulakatSessionDto.setDifficulty(session.getDifficulty());
+
+        MulakatDetayDto mulakatDetayDto = new MulakatDetayDto();
+        mulakatDetayDto.setMulakatSessionDto(mulakatSessionDto);
+        mulakatDetayDto.setSoruCevapPairDto(soruCevapPairDtoList);
+        mulakatDetayDto.setGenelPaun(puanOrtalamasi);
+
+        return mulakatDetayDto;
+    }
+
 }

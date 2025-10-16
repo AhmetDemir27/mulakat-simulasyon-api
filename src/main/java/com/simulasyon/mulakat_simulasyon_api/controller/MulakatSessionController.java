@@ -5,6 +5,7 @@ import com.simulasyon.mulakat_simulasyon_api.dto.MulakatSessionDto;
 import com.simulasyon.mulakat_simulasyon_api.dto.request.MulakatStartRequest;
 import com.simulasyon.mulakat_simulasyon_api.dto.request.SendAnswerRequest;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.AnswerEvaluationResponse;
+import com.simulasyon.mulakat_simulasyon_api.dto.response.MulakatDetayDto;
 import com.simulasyon.mulakat_simulasyon_api.dto.response.MulakatStartResponse;
 import com.simulasyon.mulakat_simulasyon_api.service.MulakatSessionService;
 import org.springframework.http.HttpStatus;
@@ -57,5 +58,14 @@ public class MulakatSessionController {
             @RequestParam(name = "userId") Long userId){
         List<MulakatSessionDto> mulakatlar = mulakatSessionService.kullanicininMulakatlariniListele(userId);
         return ResponseEntity.ok(mulakatlar);
+    }
+
+    @GetMapping("{sessionId}")
+    public ResponseEntity<MulakatDetayDto> getMulakatDetay(
+            @PathVariable Long sessionId,
+            @RequestParam Long userId){
+
+        MulakatDetayDto mulakatDetayDto = mulakatSessionService.getMulakatDetaylari(userId,sessionId);
+        return ResponseEntity.ok(mulakatDetayDto);
     }
 }
