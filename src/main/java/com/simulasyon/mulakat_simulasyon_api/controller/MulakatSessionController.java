@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/mulakatlar/")
+@RequestMapping("/api/mulakatlar")
 public class MulakatSessionController {
 
     private final MulakatSessionService mulakatSessionService;
@@ -60,7 +60,7 @@ public class MulakatSessionController {
         return ResponseEntity.ok(mulakatlar);
     }
 
-    @GetMapping("{sessionId}")
+    @GetMapping("/{sessionId}")
     public ResponseEntity<MulakatDetayDto> getMulakatDetay(
             @PathVariable Long sessionId,
             @RequestParam Long userId){
